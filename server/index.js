@@ -2,10 +2,13 @@ import dotenv from "dotenv"
 import express from "express"
 
 dotenv.config({ path: ".env.local" })
+
+// Check if all required variables are set
 if (!process.env.BOT_TOKEN) {
   console.log("Error: missing BOT_TOKEN in .env.local")
   process.exit(1)
 }
+// // Check if all required variables are set
 // const missing = ["BOT_TOKEN"]
 //   .map((key) => {
 //     if (!process.env[key]) {
@@ -40,7 +43,7 @@ const getChatsIds = async () => {
     })
 }
 
-app.post("/api/sendMessage", async (req, res) => {
+const sendMessage = async (text) => {
   const chatIds = await getChatsIds()
   for (const chatId of chatIds) {
     await fetch(`${url}/sendMessage`, {
@@ -50,19 +53,38 @@ app.post("/api/sendMessage", async (req, res) => {
       },
       body: JSON.stringify({
         chat_id: chatId,
-        text: req.body.text,
+        text,
       }),
     })
-      .then((response) => response.json())
-      // .then((data) => {
-      //   console.log("Message sent:", data)
-      // })
-      .catch((error) => {
-        console.error("Error sending message:", error)
-      })
   }
+}
 
-  res.json({ success: true })
+app.post("/api/sendMessage", async (req, res) => {
+  const { text } = req.body
+  try {
+    await sendMessage(text)
+    return res.json({ success: true, text })
+  } catch (error) {
+    console.error(error)
+    await sendMessage(`[ERROR]\n${error.stack}\n}`)
+    return res.json({
+      success: false,
+      message: error.message,
+    })
+  }
+})
+
+app.get("/api/simulateError", async (req, res) => {
+  try {
+    throw new Error("Simulated error, just ignore")
+  } catch (error) {
+    console.error(error)
+    await sendMessage(`[ERROR]\n${error.stack}\n}`)
+    return res.json({
+      success: false,
+      message: error.message,
+    })
+  }
 })
 
 app.listen(3000, async () => {
