@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 const url = `https://api.telegram.org/bot${process.env.BOT_TOKEN}`
 
 const getChatsIds = async () => {
-  return await fetch(`${url}/getUpdates`)
+  const data = await fetch(`${url}/getUpdates`)
     .then((response) => response.json())
     .then((data) => {
       return data.result.map((update) => update.message.chat.id)
@@ -41,6 +41,7 @@ const getChatsIds = async () => {
     .catch((error) => {
       console.error("Error fetching updates:", error)
     })
+  return new Array(...new Set(data))
 }
 
 const sendMessage = async (text) => {
