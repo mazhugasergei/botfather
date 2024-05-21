@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button onclick="sendMessage()">Send "Hello World!"</button>
+    <pre id="output"></pre>
+  </body>
+  <script>
+    const sendMessage = async () => {
+      await fetch("http://localhost:3000/api/sendMessage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: "Hello World!",
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("output").textContent = JSON.stringify(data)
+        })
+        .catch((error) => {
+          document.getElementById("output").textContent = JSON.stringify(error)
+        })
+    }
+  </script>
+</html>
