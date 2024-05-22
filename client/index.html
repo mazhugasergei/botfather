@@ -4,72 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-          "Open Sans", "Helvetica Neue", sans-serif;
-      }
-      body {
-        height: 100vh;
-        display: grid;
-        place-items: center;
-        background: #f5f5f5;
-      }
-      .divider {
-        border-top: 0.0625rem solid #ddd;
-        margin: 1rem 0;
-      }
-      .container {
-        width: 100%;
-        max-width: 30rem;
-        background: #fff;
-        border-radius: 1rem;
-        padding: 2rem;
-        margin: 0 auto;
-      }
-      h1 {
-        margin-bottom: 1rem;
-      }
-      label {
-        display: block;
-        margin-bottom: 0.5rem;
-      }
-      input {
-        display: block;
-        width: 100%;
-        border-radius: 0.5rem;
-        border: 0.0625rem solid #ddd;
-        padding: 0.5rem;
-      }
-      button {
-        cursor: pointer;
-        display: block;
-        width: 100%;
-        border-radius: 0.5rem;
-        border: 0.0625rem solid #ddd;
-        background: #f5f5f5;
-        transition: background 0.2s;
-        padding: 0.5rem;
-        margin-top: 0.5rem;
-      }
-      button:hover {
-        background: #eee;
-      }
-      pre {
-        font-family: monospace;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        border-radius: 0.5rem;
-        border: 0.0625rem solid #333;
-        background: #222;
-        color: #fff;
-        padding: 1rem;
-        margin-top: 0.5rem;
-      }
-    </style>
+    <link rel="stylesheet" href="index.css" />
   </head>
   <body>
     <div class="container">
@@ -77,7 +12,7 @@
 
       <form onsubmit="sendMessage(); return false">
         <label for="text">Send message</label>
-        <input id="text" type="text" name="text" minlength="1" maxlength="4096" required />
+        <textarea id="text" type="text" name="text" minlength="1" maxlength="4096" required></textarea>
         <button>Send</button>
       </form>
 
@@ -90,41 +25,10 @@
 
       <div class="divider"></div>
 
-      <p>Output</p>
+      <label>Output</label>
       <pre id="output">{}</pre>
     </div>
-  </body>
-  <script>
-    const sendMessage = async () => {
-      const form = document.querySelector("form")
-      const formData = new FormData(form)
-      const text = formData.get("text")
-      await fetch("http://localhost:3000/api/sendMessage", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          document.getElementById("output").innerText = JSON.stringify(data, null, 2)
-        })
-        .catch((error) => {
-          document.getElementById("output").innerText = JSON.stringify(error, null, 2)
-        })
-      form.reset()
-    }
 
-    const simulateError = async () => {
-      await fetch("http://localhost:3000/api/simulateError")
-        .then((response) => response.json())
-        .then((data) => {
-          document.getElementById("output").innerText = JSON.stringify(data, null, 2)
-        })
-        .catch((error) => {
-          document.getElementById("output").innerText = JSON.stringify(error, null, 2)
-        })
-    }
-  </script>
+    <script src="index.js"></script>
+  </body>
 </html>

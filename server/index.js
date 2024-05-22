@@ -1,93 +1,22 @@
 import dotenv from "dotenv"
 import express from "express"
+import routes from "./routes/index.js"
+import { handleErrors, unhandledRejection } from "./middleware/errors.js"
+import { cors } from "./middleware/cors.js"
+import { envCheck } from "./middleware/env.js"
 
-dotenv.config({ path: ".env.local" })
-
-// Check if all required variables are set
-if (!process.env.BOT_TOKEN) {
-  console.log("Error: missing BOT_TOKEN in .env.local")
-  process.exit(1)
-}
-// // Check if all required variables are set
-// const missing = ["BOT_TOKEN"]
-//   .map((key) => {
-//     if (!process.env[key]) {
-//       return key
-//     }
-//   })
-//   .filter(Boolean)
-
-// if (missing.length) {
-//   console.log("Error: missing", missing, "in .env.local")
-//   process.exit(1)
-// }
+dotenv.config({ path: [".env", ".env.local"] })
+envCheck({ keys: ["BOT_TOKEN", "CHAT_ID"], local: true })
 
 const app = express()
 app.use(express.json())
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*")
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type")
-  next()
-})
+app.use(cors)
+app.use(routes)
 
-const url = `https://api.telegram.org/bot${process.env.BOT_TOKEN}`
+// errors
+app.use(handleErrors)
+process.on("unhandledRejection", unhandledRejection) // Global error handling for unhandled promise rejections
 
-const getChatsIds = async () => {
-  const data = await fetch(`${url}/getUpdates`)
-    .then((response) => response.json())
-    .then((data) => {
-      return data.result.map((update) => update.message.chat.id)
-    })
-    .catch((error) => {
-      console.error("Error fetching updates:", error)
-    })
-  return new Array(...new Set(data))
-}
-
-const sendMessage = async (text) => {
-  const chatIds = await getChatsIds()
-  for (const chatId of chatIds) {
-    await fetch(`${url}/sendMessage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-      }),
-    })
-  }
-}
-
-app.post("/api/sendMessage", async (req, res) => {
-  const { text } = req.body
-  try {
-    await sendMessage(text)
-    return res.json({ success: true, text })
-  } catch (error) {
-    console.error(error)
-    await sendMessage(`[ERROR]\n${error.stack}\n}`)
-    return res.json({
-      success: false,
-      message: error.message,
-    })
-  }
-})
-
-app.get("/api/simulateError", async (req, res) => {
-  try {
-    throw new Error("Simulated error, just ignore")
-  } catch (error) {
-    console.error(error)
-    await sendMessage(`[ERROR]\n${error.stack}\n}`)
-    return res.json({
-      success: false,
-      message: error.message,
-    })
-  }
-})
-
-app.listen(3000, async () => {
+app.listen(3000, () => {
   console.log("\x1b[7m\x1b[33m[Server]\x1b[0m Started on port 3000")
 })
