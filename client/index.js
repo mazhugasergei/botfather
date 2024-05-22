@@ -1,4 +1,9 @@
+const resetOutput = () => {
+  document.getElementById("output").innerText = "{}"
+}
+
 const sendMessage = async () => {
+  resetOutput()
   const form = document.querySelector("form")
   const formData = new FormData(form)
   const text = formData.get("text")
@@ -20,6 +25,7 @@ const sendMessage = async () => {
 }
 
 const simulateError = async () => {
+  resetOutput()
   await fetch("http://localhost:3000/api/error")
     .then((response) => response.json())
     .then((data) => {
